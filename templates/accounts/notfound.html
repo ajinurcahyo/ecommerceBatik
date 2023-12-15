@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error 404</title>
+    <style>
+        @keyframes blink {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .blink-text {
+            animation: blink 1.5s infinite;
+        }
+
+        body {
+            background-color: #3980c6;
+            text-align: center;
+            padding: 50px;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .fof {
+            margin-top: 50px;
+        }
+
+        h1 {
+            color: #ffff04;
+            font-size: 150px;
+            margin-bottom: 20px;
+        }
+
+        p {
+            color: #6c757d;
+            font-size: 24px;
+        }
+
+        a {
+            text-decoration: none;
+            background-color: #000000;
+            color: #ffffff;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="main">
+        <div class="fof">
+            <h1 class="blink-text">- 404 -</h1>
+            <p style="color: #000000; font-size: 24px;">Oops! Sorry - Under Maintenance hehe</p>
+            <a href="{% url 'dashboard' %}" style="text-decoration: none; background-color: #4b5157; color: #ffffff; padding: 10px 20px; font-size: 18px; border-radius: 5px;">Back to Dashboard</a>
+        </div>
+    </div>
+
+</body>
+</html>

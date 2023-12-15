@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    .bg {
+        background: rgba(255, 255, 255, 0.8); /* Nilai alpha (0.8) menentukan tingkat transparansi */
+        padding: 35px; /* Sesuaikan padding sesuai kebutuhan */
+        border-radius: 1px; /* Tambahkan border-radius untuk sudut elemen */
+    }
+</style>
+
+<section class="section-content padding-y bg">
+    <div class="container">
+        <!-- ============================ COMPONENT 1 ================================= -->
+        <h4 class="text-center mb-20">Order Anda :</h4>
+        <div class="row">
+            <aside class="col-lg-8">
+                <div class="card">
+                    <h5 class="card-header">Alamat Tagihan</h5>
+                    <div class="card-body">
+                        <p class="card-text mb-0">Nama: {{order.full_name}}</p>
+                        <p class="card-text mb-0">Alamat: {{order.full_address}}</p>
+                        
+                        <p class="card-text mb-0">Email: {{order.email}}</p>
+                        <p class="card-text mb-0">No hp: {{order.phone}}</p>
+                        {% if order.order_note %}
+                        <b>Catatan: </b> {{order.order_note}}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card">
+                    <h5 class="card-header">Metode pembayaran</h5>
+                    <div class="card-body">
+                        <p class="card-text">-</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <h5 class="card-header">Tinjau Produk</h5>
+                    <div class="card-body">
+                        <table class="table table-borderless table-shopping-cart">
+                            <thead class="text-muted">
+                                <tr class="small text-uppercase">
+                                    <th scope="col">Product</th>
+                                    <th scope="col" width="120">Jumlah</th>
+                                    <th scope="col" width="120">Harga</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cart_item in cart_items %}
+                                <tr>
+                                    <td>
+                                        <figure class="itemside align-items-center">
+                                            <div class="aside"><img src="{{ cart_item.product.images.url }}" class="img-sm"></div>
+                                            <figcaption class="info">
+                                                <a href="{{ cart_item.product.get_url }}" class="title text-dark">{{ cart_item.product.product_name }}</a>
+                                                <p class="text-muted small">
+                                                    {% if cart_item.variations.all %}
+                                                    {% for item in cart_item.variations.all %}
+                                                    {{ item.variation_category | capfirst }} : {{ item.variation_value | capfirst }} <br>
+                                                    {% endfor %}
+                                                    {% endif %}
+                                                </p>
+                                            </figcaption>
+                                        </figure>
+                                    </td>
+                                    <td>
+                                        <!-- col.// -->
+                                        <label for="">{{cart_item.quantity}}</label>
+                                    </td>
+                                    <td>
+                                        <div class="price-wrap">
+                                            <var class="price">Rp. {{ cart_item.sub_total }}</var>
+                                            <small class="text-muted"> Rp. {{ cart_item.product.price }} satuan </small>
+                                        </div> <!-- price-wrap .// -->
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </aside> <!-- col.// -->
+            <aside class="col-lg-4">
+                <div class="card">
+                    <div class="card-body">
+                        <dl class="dlist-align">
+                            <dt>Total harga:</dt>
+                            <dd class="text-right">Rp. {{total}}</dd>
+                        </dl>
+                        <dl class="dlist-align">
+                            <dt>Pajak:</dt>
+                            <dd class="text-right">Rp. {{tax}}</dd>
+                        </dl>
+                        <dl class="dlist-align">
+                            <dt>Total keseluruhan:</dt>
+                            <dd class="text-right text-dark b"><strong>Rp. {{grand_total}}</strong></dd>
+                        </dl>
+                        <hr>
+                        <form id="payment-form">
+                            <div class="form-group">
+                                <label for="payment-amount">Masukkan Jumlah (Rp.)</label>
+                                <input type="number" class="form-control" id="payment-amount" name="payment-amount" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Bayar</button>
+                        </form>
+                    </div> <!-- card-body.// -->
+                </div> <!-- card.// -->
+            </aside> <!-- col.// -->
+        </div> <!-- row.// -->
+        <!-- ============================ COMPONENT 1 END .// ================================= -->
+    </div> <!-- container .//  -->
+</section>
+<!-- ========================= SECTION CONTENT END// ========================= -->
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+	var status = "success"; // Ganti dengan status yang sesuai
+
+    var url = "{% url 'payments' %}";
+    var csrftoken = getCookie('csrftoken');
+    var orderID = "{{order.order_number}}";
+    var payment_method = 'Input Amount';
+    var redirect_url = "{% url 'order_complete' %}";
+
+    document.getElementById("payment-form").addEventListener("submit", function (event) {
+        event.preventDefault();
+        var paymentAmount = document.getElementById("payment-amount").value;
+        sendData(paymentAmount);
+    });
+
+    function sendData(paymentAmount) {
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-type": "application/json",
+                "X-CSRFToken": csrftoken,
+            },
+            body: JSON.stringify({
+                orderID: orderID,
+                paymentAmount: paymentAmount,
+                payment_method: payment_method,
+            }),
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            alert('Pembayaran Anda Berhasil !');
+            window.location.href = redirect_url + '?order_number=' + data.order_number;
+        })
+        .catch((error) => {
+            alert('Pembayaran gagal. Silakan coba lagi.');
+        });
+    }
+
+
+</script>
+
+{% endblock %}
