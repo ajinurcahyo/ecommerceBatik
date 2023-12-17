@@ -107,29 +107,20 @@ def submit_review(request, product_id):
 '''
 def submit_review(request, product_id):
     url = request.META.get('HTTP_REFERER')
+
     if request.method == 'POST':
         try:
-            reviews = ReviewRating.objects.get(user__id=request.user.id, product__id=product_id)
-            form = ReviewForm(request.POST, instance=reviews)
-            if form.is_valid():
-                form.save()
-                messages.success(request, 'Thank you! Your review has been updated.')
-            else:
-                print(form.errors)
-            return redirect(url)
+            review_instance = ReviewRating.objects.get(user__id=request.user.id, product__id=product_id)
+            form = ReviewForm(request.POST, instance=review_instance)
+            form.save()
+            messages.success(request, 'Terima kasih! Ulasan Anda telah diperbarui.')
         except ReviewRating.DoesNotExist:
             form = ReviewForm(request.POST)
             if form.is_valid():
-                data = ReviewRating()
-                data.subject = form.cleaned_data['subject']
-                data.rating = form.cleaned_data['rating']
-                data.review = form.cleaned_data['review']
-                data.ip = request.META.get('REMOTE_ADDR')
+                data = form.save(commit=False)
                 data.product_id = product_id
-                data.user_id = request.user.id
+                data.user = request.user
                 data.save()
-                messages.success(request, 'Thank you! Your review has been submitted.')
-            else:
-                print(form.errors)
-            return redirect(url)
+                messages.success(request, 'Terima kasih! Ulasan Anda telah dikirim.')
+    return redirect(url)
 '''

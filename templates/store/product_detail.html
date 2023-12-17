@@ -10,6 +10,42 @@
         padding: 40px; /* Sesuaikan padding sesuai kebutuhan */
         border-radius: 1px; /* Tambahkan border-radius untuk sudut elemen */
     }
+
+	#ulasanContainer {
+		text-align: left;
+		margin-top: 20px;
+	}
+
+	#ulasanForm {
+		background-color: #e6ebe6;
+		display: none;
+		max-width: 400px;
+		margin: 0 auto;
+		padding: 15px;
+		border: 1px solid #ccc;
+		border-radius: 5px;
+	}
+
+	#ulasanForm label,
+	#ulasanForm textarea,
+	#ulasanForm input {
+		margin-bottom: 10px;
+		display: block;
+		width: 100%;
+	}
+
+	#ulasanForm button {
+		background-color: #4CAF50;
+		color: white;
+		padding: 10px 15px;
+		border: none;
+		border-radius: 5px;
+		cursor: pointer;
+	}
+
+	#ulasanForm button:hover {
+		background-color: #45a049;
+	}
 </style>
 
 <section class="section-content padding-y bg">
@@ -98,7 +134,27 @@
 
 		<br>
 
-	
+		<div id="ulasanContainer">
+			<button onclick="tampilkanForm()" style="background-color: #2895dd; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer;">Berikan review & rating</button>
+		
+			<form id="ulasanForm" method="post" action="{% url 'submit_review' single_product.id %}">
+				{% csrf_token %}
+				
+				<label for="id_subject">Subject:</label>
+				<input type="text" name="subject" id="id_subject" required>
+				
+				<label for="id_review">Review:</label>
+				<textarea name="review" id="id_review" required></textarea>
+				
+				<label for="id_rating">Rating:</label>
+				<input type="number" name="rating" id="id_rating" required>
+				
+				<button type="submit">Submit</button>
+				<button type="button" onclick="sembunyikanForm()" style="background-color: #e74c3c; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px;">Hidden Form</button>
+			</form>
+		</div>
+		
+
 <header class="section-heading">
 	<h3 style="color: #000000;">Customer Reviews </h3>
 	<div class="rating-star">
@@ -146,4 +202,15 @@
 </section>
 <!-- ========================= SECTION CONTENT END// ========================= -->
 
+<script>
+    function tampilkanForm() {
+        var form = document.getElementById("ulasanForm");
+        form.style.display = "block";
+    }
+
+	function sembunyikanForm() {
+        var form = document.getElementById("ulasanForm");
+        form.style.display = "none";
+    }
+</script>
 {% endblock %}

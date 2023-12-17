@@ -75,79 +75,17 @@ def payments(request):
     }
     return JsonResponse(data)
 '''
-#-----(benar)
-'''
+
 def payments(request):
     if request.method == 'POST':
         body = json.loads(request.body)
         try:
             order = Order.objects.get(user=request.user, is_ordered=False, order_number=body['orderID'])
 
-            # Handle the payment logic (Anda perlu mengimplementasikannya)
-
-            # Assuming you have processed the payment and got the payment amount
             payment_amount = body.get('paymentAmount', 0)
-            
-            # Get the payment status or use "PENDING" as the default
             status = body.get('status', 'PENDING')
-
-            # Store transaction details inside Payment model
-            payment = Payment(
-                user=request.user,
-                payment_method=body['payment_method'],
-                amount_paid=payment_amount,
-                status=status,  # Use the status from the request
-            )
-            payment.save()
-
-            order.payment = payment
-            order.is_ordered = True
-            order.save()
-
-            # Move the cart items to Order Product table (you can keep this part as is)
-
-            # ...
-
-            # Clear the cart
-            CartItem.objects.filter(user=request.user).delete()
-
-            # Send order received email to the customer
-            mail_subject = 'Thank you for your order!'
-            message = render_to_string('orders/order_recieved_email.html', {
-                'user': request.user,
-                'order': order,
-            })
-            to_email = request.user.email
-            send_email = EmailMessage(mail_subject, message, to=[to_email])
-            send_email.send()
-
-            # Send order number and transaction ID back to the JavaScript in JSON response
-            data = {
-                'order_number': order.order_number,
-                'transID': payment.payment_id,
-            }
-            return JsonResponse(data)
-        except Order.DoesNotExist:
-            return HttpResponse('Order not found', status=404)  # Menangani jika pesanan tidak ditemukan
-'''
-def payments(request):
-    if request.method == 'POST':
-        body = json.loads(request.body)
-        try:
-            order = Order.objects.get(user=request.user, is_ordered=False, order_number=body['orderID'])
-
-            # Handle the payment logic (Anda perlu mengimplementasikannya)
-
-            # Assuming you have processed the payment and got the payment amount
-            payment_amount = body.get('paymentAmount', 0)
-
-            # Get the payment status or use "PENDING" as the default
-            status = body.get('status', 'PENDING')
-
-            # Generate a unique payment_id using UUID
             payment_id = uuid.uuid4()
 
-            # Store transaction details inside Payment model
             payment = Payment(
                 user=request.user,
                 payment_method=body['payment_method'],
@@ -161,14 +99,8 @@ def payments(request):
             order.is_ordered = True
             order.save()
 
-            # Move the cart items to Order Product table (you can keep this part as is)
-
-            # ...
-
-            # Clear the cart
             CartItem.objects.filter(user=request.user).delete()
 
-            # Send order received email to the customer
             mail_subject = 'Thank you for your order!'
             message = render_to_string('orders/order_recieved_email.html', {
                 'user': request.user,
@@ -178,7 +110,6 @@ def payments(request):
             send_email = EmailMessage(mail_subject, message, to=[to_email])
             send_email.send()
 
-            # Send order number and transaction ID back to the JavaScript in JSON response
             data = {
                 'order_number': order.order_number,
                 'transID': str(payment.payment_id),  # Convert UUID to string
@@ -190,7 +121,6 @@ def payments(request):
 def place_order(request, total=0, quantity=0,):
     current_user = request.user
 
-    # If the cart count is less than or equal to 0, then redirect back to shop
     cart_items = CartItem.objects.filter(user=current_user)
     cart_count = cart_items.count()
     if cart_count <= 0:
