@@ -80,9 +80,11 @@ def search(request):
     }
     return render(request, 'store/store.html', context)
 
-
+from django.contrib.auth.decorators import login_required
+@login_required  # Menambahkan decorator untuk memastikan pengguna sudah login
 def submit_review(request, product_id):
     url = request.META.get('HTTP_REFERER')
+    
     if request.method == 'POST':
         try:
             reviews = ReviewRating.objects.get(user__id=request.user.id, product__id=product_id)
@@ -92,6 +94,7 @@ def submit_review(request, product_id):
             return redirect(url)
         except ReviewRating.DoesNotExist:
             form = ReviewForm(request.POST)
+            
             if form.is_valid():
                 data = ReviewRating()
                 data.subject = form.cleaned_data['subject']
@@ -103,6 +106,11 @@ def submit_review(request, product_id):
                 data.save()
                 messages.success(request, 'Thank you! Your review has been submitted.')
                 return redirect(url)
+    
+    # Jika bukan metode POST, atau jika ada kesalahan dalam form, atau jika pengguna tidak login,
+    # kembalikan atau lakukan penanganan sesuai kebutuhan.
+    messages.error(request, 'You must be logged in to submit a review.')
+    return redirect('login')  # Ganti 'login' dengan nama URL untuk halaman login di aplikasi Anda
 
 '''
 def submit_review(request, product_id):
